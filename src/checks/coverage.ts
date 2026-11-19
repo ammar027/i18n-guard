@@ -31,6 +31,8 @@ export function computeCoverage(ctx: CheckContext): CoverageRow[] {
         const v = f?.values[key];
         if (typeof v !== "string" || v.trim() === "") continue;
         if (lang !== def && v === en && !falsePositive(ctx, key, en)) continue;
+        const mk = ctx.config.options.syncMarker.trim();
+        if (lang !== def && mk && v.trimStart().startsWith(mk)) continue;
         translated++;
       }
     }

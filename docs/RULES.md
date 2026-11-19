@@ -21,3 +21,4 @@
 | Locale files reorder randomly, noisy diffs and merge conflicts | `sorted-keys` + `--fix` |
 | A language ships half-translated | `coverage` + `minCoverage`, `required` languages |
 | A one-off exception hides forever in the baseline | inline `i18n-guard-ignore-*` with a reason (reported when stale) |
+| A new key was added in English only and forgotten elsewhere | `sync` adds it marked `[TODO]` in every language; the guard fails until translated |

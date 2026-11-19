@@ -56,6 +56,7 @@ List them with `npx i18n-guard checks`.
 | `check` | run the checks; exit 1 on a new error. `--strict` also fails on warnings, `--staged` checks only staged files, `--fix` sorts keys (when `sortedKeys` is on), `--only a,b`, `--format console\|markdown\|json\|sarif`, `--output file` |
 | `baseline` | record current findings so only new ones fail ([docs](docs/BASELINES.md)) |
 | `report` | markdown report to `i18n-guard-report.md` |
+| `sync` | add the default language's missing keys to every language (marked `[TODO]`), `--prune` removes strays; dry-run unless `--write` ([docs](docs/SYNC.md)) |
 | `status` | translated share per language vs `options.minCoverage` and required/optional languages |
 | `doctor` | verify config, locale files and tooling |
 

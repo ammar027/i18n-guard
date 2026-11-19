@@ -43,6 +43,7 @@ export const DEFAULTS: GuardConfig = {
     genericWords: GENERIC_WORDS,
     ignoreKeys: [],
     extraKeys: true,
+    syncMarker: "[TODO] ",
     messageSyntax: "auto",
     bareKeysNeedDefault: false,
     unusedMode: "calls",

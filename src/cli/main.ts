@@ -5,6 +5,7 @@ import { findConfig, loadConfig, PRESETS } from "../config.js";
 import { loadLocales } from "../locales.js";
 import { CHECKS, runGuard } from "../runner.js";
 import { computeCoverage } from "../checks/coverage.js";
+import { applySync, planSync } from "../sync.js";
 import { render, type Format } from "../reporters/index.js";
 import type { Framework } from "../types.js";
 
@@ -16,6 +17,7 @@ const HELP = `i18n-guard — stop untranslated text before it ships
   i18n-guard baseline            Record current findings so only NEW ones fail
   i18n-guard report              Same as check --format markdown --output i18n-guard-report.md
   i18n-guard status [--format console|json]   Translated share per language vs options.minCoverage
+  i18n-guard sync [--write] [--prune] [--check] [--lang de,fr]   Add missing keys (marked), optionally remove strays. Dry-run unless --write
   i18n-guard doctor              Verify config, locale files and tooling
   i18n-guard checks              List checks
 
@@ -126,6 +128,29 @@ export async function main(argv: string[]): Promise<number> {
   if (cmd === "checks") { for (const [, c] of CHECKS) console.log(`${c.name.padEnd(14)} ${c.description}`); return 0; }
   if (cmd === "init") return init(cwd, flags);
   if (cmd === "doctor") return doctor(cwd, str("config"));
+  if (cmd === "sync") {
+    const config = await loadConfig(cwd, str("config"));
+    const plan = planSync(config, { prune: flags.has("prune"), langs: str("lang")?.split(",").map((x) => x.trim()) });
+    const write = flags.has("write");
+    for (const f of plan.files) {
+      if (f.skipped) { console.log(`! ${f.file}: skipped, ${f.skipped}`); continue; }
+      console.log(`${write ? (f.created ? "created" : "updated") : f.created ? "would create" : "would update"} ${f.file}: +${f.added.length}${f.removed.length ? ` -${f.removed.length}` : ""}`);
+      for (const k of f.added.slice(0, 8)) console.log(`    + ${k}`);
+      for (const k of f.removed.slice(0, 8)) console.log(`    - ${k}`);
+      if (f.added.length > 8) console.log(`    … ${f.added.length - 8} more added`);
+      if (f.removed.length > 8) console.log(`    … ${f.removed.length - 8} more removed`);
+    }
+    const marker = config.options.syncMarker;
+    if (!plan.files.some((f) => !f.skipped)) console.log("Nothing to sync: every language has the default language's keys.");
+    if (plan.strays && !flags.has("prune")) console.log(`\n${plan.strays} stray key(s) exist only in other languages. Remove them with --prune.`);
+    if (write) {
+      const written = applySync(config, plan);
+      console.log(`\nWrote ${written.length} file(s): +${plan.added}${plan.removed ? ` -${plan.removed}` : ""}. ${marker ? `New values are prefixed "${marker.trim()}"; ` : "New values are plain copies; "}translate them, then run: i18n-guard check`);
+    } else if (plan.files.some((f) => !f.skipped)) {
+      console.log("\nDry run. Nothing was written. Re-run with --write to apply.");
+    }
+    return flags.has("check") && plan.files.some((f) => !f.skipped) ? 1 : 0;
+  }
   if (cmd === "status") {
     const config = await loadConfig(cwd, str("config"));
     const rows = computeCoverage({ config, locales: loadLocales(config), staged: null });

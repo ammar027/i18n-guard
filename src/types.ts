@@ -90,6 +90,8 @@ export interface GuardConfig {
     /** Message grammar to validate: `auto` picks by framework (i18next `{{x}}`, ICU for next-intl, `{x}` braces for vue-i18n). */
     /** Minimum translated share (0-100) per language; a number for all, or a map per language. */
     readonly minCoverage?: number | Readonly<Record<string, number>>;
+    /** Prefix `sync` puts on copied default text so the guard (and coverage) treat it as untranslated. Empty = plain copy. */
+    readonly syncMarker: string;
     readonly messageSyntax: "auto" | "i18next" | "icu" | "braces" | "off";
     /** A dotless key such as t("total") only counts as a translation key when a default follows (default false). */
     readonly bareKeysNeedDefault: boolean;

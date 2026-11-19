@@ -101,7 +101,8 @@ function placeholderReason(ctx: CheckContext, lang: string, key: string, en: str
   if (!isDef && generic?.includes(v) && !GENERIC_EN.has(en.trim().toLowerCase())) return "generic field word used as text";
   if (!isDef && defEn && o.mustTranslate.includes(v)) return "English UI word left untranslated";
   if (!isDef && defEn && (val.replace(/\{\{[^}]*\}\}/g, "").match(ENGLISH_FRAGMENT)?.length ?? 0) >= 2) return "English sentence fragment";
-  if (v.startsWith("[todo") || v.startsWith("todo:")) return "TODO marker left in translation";
+  const marker = o.syncMarker.trim().toLowerCase();
+  if (v.startsWith("[todo") || v.startsWith("todo:") || (marker && v.startsWith(marker))) return "TODO marker left in translation";
   if (
     isDef && defEn && /(Hint|Description|Title|Desc|Placeholder)$/.test(last) && v === words &&
     words.split(" ").length >= 3 && val.split(" ").every((w) => /^[A-Z]/.test(w))
