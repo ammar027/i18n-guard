@@ -77,6 +77,8 @@ export interface GuardConfig {
     readonly genericWords: Readonly<Record<string, readonly string[]>>;
     /** Keys (`ns:key` or `key`) to skip in every locale check. */
     readonly ignoreKeys: readonly string[];
+    /** Warn about keys that exist in a language but not in the default (default true). */
+    readonly extraKeys: boolean;
     /** A dotless key such as t("total") only counts as a translation key when a default follows (default false). */
     readonly bareKeysNeedDefault: boolean;
     /** `calls`: a key is used when a translator call references it. `literals`: any quoted string equal to the key (or an ancestor/dynamic prefix) counts, e.g. keys kept in config objects. */

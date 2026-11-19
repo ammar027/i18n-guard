@@ -54,7 +54,7 @@ export const parity: Check = {
           if (ignored(ctx, ns, key)) continue;
           if (!(key in f.values)) out.push(issue("parity", lang, ns, key, `Missing in ${lang}.`));
         }
-        for (const key of Object.keys(f.values)) {
+        for (const key of ctx.config.options.extraKeys ? Object.keys(f.values) : []) {
           if (!(key in base.values)) out.push(issue("parity", lang, ns, key, `Key exists in ${lang} but not in ${def}.`, "warning"));
         }
       }

@@ -150,3 +150,9 @@ test("unusedMode literals + maxUnusedKeys ratchet", async () => {
   assert.equal(over.length, 1);
   assert.match(over[0]?.message ?? "", /1 new unused/);
 });
+
+test("parity: stray key warns, extraKeys:false silences it", async () => {
+  const files = { "src/locales/de/common.json": { save: "Änderungen speichern", greeting: "Hallo {{name}}", items_one: "{{count}} Eintrag", items_other: "{{count}} Einträge", stray: "Übrig" } };
+  assert.equal(byCheck(await run(files), "parity").filter((x) => x.severity === "warning").length, 1);
+  assert.equal(byCheck(await run(files, { options: { extraKeys: false } }), "parity").length, 0);
+});

@@ -42,6 +42,7 @@ export const DEFAULTS: GuardConfig = {
     mustTranslate: MUST_TRANSLATE,
     genericWords: GENERIC_WORDS,
     ignoreKeys: [],
+    extraKeys: true,
     bareKeysNeedDefault: false,
     unusedMode: "calls",
     unusedRoots: [],
