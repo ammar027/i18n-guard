@@ -84,7 +84,7 @@ import { installMissingKeyReporter } from "@ammar-multani/i18n-guard/runtime";
 installMissingKeyReporter(i18n, { report: (e) => Sentry.captureMessage(`i18n missing ${e.namespace}:${e.key}`) });
 ```
 
-i18next reports only keys missing in **every** language; a language silently falling back to English is caught at build time by `parity`/`untranslated`. `pseudoLocalize()` helps QA spot hardcoded runtime text ([docs](docs/RUNTIME.md)).
+i18next reports only keys missing in **every** language; a language silently falling back to English is caught at build time by `parity`/`untranslated`. `pseudoLocalize()` plus the Playwright scanner (`@ammar-multani/i18n-guard/playwright`) fails on visible text that never went through `t()`: database labels, enums, API messages ([docs](docs/PSEUDO.md), [example](examples/pseudo-locale-playwright)).
 
 ## Examples
 

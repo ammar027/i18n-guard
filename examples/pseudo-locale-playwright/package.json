@@ -1,0 +1,7 @@
+{
+  "name": "example-pseudo-locale-playwright",
+  "private": true,
+  "type": "module",
+  "scripts": { "test:pseudo": "playwright test" },
+  "devDependencies": { "@ammar-multani/i18n-guard": "*", "@playwright/test": "^1.48.0" }
+}

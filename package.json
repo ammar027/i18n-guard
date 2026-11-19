@@ -30,6 +30,10 @@
     "./runtime": {
       "types": "./dist/runtime/index.d.ts",
       "default": "./dist/runtime/index.js"
+    },
+    "./playwright": {
+      "types": "./dist/playwright/index.d.ts",
+      "default": "./dist/playwright/index.js"
     }
   },
   "files": [
@@ -69,7 +73,9 @@
     "i18next": "^25.0.0",
     "tsx": "^4.19.0",
     "typescript": "^5.6.0",
-    "vue-eslint-parser": "^10.4.2"
+    "vue-eslint-parser": "^10.4.2",
+    "jsdom": "^25.0.0",
+    "@types/jsdom": "^21.1.7"
   },
   "publishConfig": {
     "access": "public"
