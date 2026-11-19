@@ -4,6 +4,8 @@ Stop untranslated text before it ships. One package, one config, for **React / R
 
 It exists because "we have a lint rule" is not enough: untranslated copy still reaches users through attributes, ternaries, toasts, config objects, empty or copied values, wrong `{{variables}}`, and keys that were never added. Every check here maps to a real miss — see [docs/RULES.md](docs/RULES.md).
 
+**Using an AI agent?** Tell it: "Follow [AGENTS.md](AGENTS.md) to set up i18n-guard in this project."
+
 ## Quick start
 
 ```bash
