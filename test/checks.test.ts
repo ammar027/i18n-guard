@@ -121,3 +121,32 @@ test("react-i18next: a file binding several namespaces does not produce false mi
   const i = await run(files, { locales: { namespaces: ["common", "docs"] } });
   assert.deepEqual(byCheck(i, "missing-keys").map((x) => x.key), ["ghost"]);
 });
+
+test("bareKeysNeedDefault: dotless keys only count with a default; comments are ignored", async () => {
+  const src = `// t("ghost.comment")\n/* t("ghost.block") */\nt("total");\nt("other", "Default");\nt("ghost.real");`;
+  const loose = byCheck(await run({ "src/B.tsx": src }), "missing-keys").map((x) => x.key).sort();
+  assert.deepEqual(loose, ["ghost.real", "other", "total"]);
+  const strict = byCheck(await run({ "src/B.tsx": src }, { options: { bareKeysNeedDefault: true } }), "missing-keys").map((x) => x.key).sort();
+  assert.deepEqual(strict, ["ghost.real", "other"]);
+});
+
+test("a parent key (returnObjects) counts as existing", async () => {
+  const files = { "src/locales/en/common.json": { menu: { a: "Alpha item", b: "Beta item" }, save: "Save changes", greeting: "Hello {{name}}", items_one: "{{count}} item", items_other: "{{count}} items" },
+    "src/locales/de/common.json": { menu: { a: "Alpha Eintrag", b: "Beta Eintrag" }, save: "Speichern", greeting: "Hallo {{name}}", items_one: "{{count}} E", items_other: "{{count}} Es" },
+    "src/B.tsx": 't("common:menu", { returnObjects: true });' };
+  assert.deepEqual(byCheck(await run(files), "missing-keys"), []);
+});
+
+test("unusedMode literals + maxUnusedKeys ratchet", async () => {
+  const files = {
+    "src/locales/en/common.json": { used: "Used in config", orphan: "Never used", save: "Save changes", greeting: "Hello {{name}}", items_one: "{{count}} item", items_other: "{{count}} items" },
+    "src/locales/de/common.json": { used: "Benutzt", orphan: "Nie benutzt", save: "Speichern", greeting: "Hallo {{name}}", items_one: "{{count}} E", items_other: "{{count}} Es" },
+    "src/cfg.ts": 'export const c = { titleKey: "used", s: "common:save", g: "greeting", i: "items" };',
+  };
+  const lit = { options: { unusedMode: "literals" as const } };
+  assert.deepEqual(byCheck(await run(files, lit), "unused-keys").map((x) => x.key), ["common:orphan"]);
+  assert.deepEqual(byCheck(await run(files, { options: { ...lit.options, maxUnusedKeys: 1 } }), "unused-keys"), []);
+  const over = byCheck(await run(files, { options: { ...lit.options, maxUnusedKeys: 0 } }), "unused-keys");
+  assert.equal(over.length, 1);
+  assert.match(over[0]?.message ?? "", /1 new unused/);
+});

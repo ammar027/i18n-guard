@@ -28,6 +28,7 @@ export const DEFAULTS: GuardConfig = {
     roots: ["src"],
     extensions: [".ts", ".tsx", ".js", ".jsx", ".mts", ".vue"],
     exclude: ["node_modules", "/dist/", "/.next/", "/.expo/", ".test.", ".spec.", "__tests__", "/locales/"],
+    stripComments: true,
   },
   translators: "t|i18n\\.t|i18next\\.t",
   checks: {
@@ -41,6 +42,9 @@ export const DEFAULTS: GuardConfig = {
     mustTranslate: MUST_TRANSLATE,
     genericWords: GENERIC_WORDS,
     ignoreKeys: [],
+    bareKeysNeedDefault: false,
+    unusedMode: "calls",
+    unusedRoots: [],
   },
   idMaps: [],
   eslint: [],

@@ -48,6 +48,8 @@ export interface GuardConfig {
     readonly extensions: readonly string[];
     /** Path fragments to skip (matched with String.includes). */
     readonly exclude: readonly string[];
+    /** Blank out comments before scanning so doc examples are not read as calls (default true). */
+    readonly stripComments: boolean;
   };
   /** Translator function names, as a regex source for the identifier (e.g. `t|t[A-Z]\w*`). */
   readonly translators: string;
@@ -75,6 +77,14 @@ export interface GuardConfig {
     readonly genericWords: Readonly<Record<string, readonly string[]>>;
     /** Keys (`ns:key` or `key`) to skip in every locale check. */
     readonly ignoreKeys: readonly string[];
+    /** A dotless key such as t("total") only counts as a translation key when a default follows (default false). */
+    readonly bareKeysNeedDefault: boolean;
+    /** `calls`: a key is used when a translator call references it. `literals`: any quoted string equal to the key (or an ancestor/dynamic prefix) counts, e.g. keys kept in config objects. */
+    readonly unusedMode: "calls" | "literals";
+    /** Extra directories read in `literals` mode (e.g. shared packages). */
+    readonly unusedRoots: readonly string[];
+    /** Ratchet: tolerate up to this many unused keys and fail only above it (instead of per-key baselining). */
+    readonly maxUnusedKeys?: number;
   };
   readonly idMaps: readonly IdMap[];
   readonly eslint: {

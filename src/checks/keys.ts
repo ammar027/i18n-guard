@@ -3,7 +3,7 @@ import path from "node:path";
 import type { Check, CheckContext, Issue } from "../types.js";
 import { scanSources, type KeyRef } from "../adapters/scan.js";
 import { namespacesOf, qualify } from "../locales.js";
-import { PLURAL_RE } from "../util.js";
+import { PLURAL_RE, walk } from "../util.js";
 
 /** Default-language keys, with plural variants also registered under their base key. */
 function defaultKeys(ctx: CheckContext): Map<string, Set<string>> {
@@ -20,9 +20,19 @@ function defaultKeys(ctx: CheckContext): Map<string, Set<string>> {
   return byNs;
 }
 
+/** A key also exists when it is a parent of existing keys (t("a.b", { returnObjects: true })). */
+function hasPrefix(set: Set<string>, k: string): boolean {
+  for (const e of set) if (e.startsWith(`${k}.`) || e.startsWith(`${k}_`)) return true;
+  return false;
+}
+
 function exists(keys: Map<string, Set<string>>, ref: KeyRef): boolean {
-  if (ref.ns !== undefined && keys.has(ref.ns)) return keys.get(ref.ns)?.has(ref.key) ?? false;
-  for (const set of keys.values()) if (set.has(ref.key)) return true;
+  const has = (set: Set<string>): boolean => set.has(ref.key) || hasPrefix(set, ref.key);
+  if (ref.ns !== undefined) {
+    if (!keys.has(ref.ns)) return false;
+    return has(keys.get(ref.ns) ?? new Set());
+  }
+  for (const set of keys.values()) if (has(set)) return true;
   return false;
 }
 
@@ -67,6 +77,7 @@ export const unusedKeys: Check = {
   description: "Default-language keys that no source file references",
   wholeProject: true,
   run(ctx) {
+    if (ctx.config.options.unusedMode === "literals") return unusedByLiterals(ctx);
     const def = ctx.config.locales.default;
     const refs = scanSources(ctx.config, null);
     const used = new Set<string>();
@@ -94,9 +105,60 @@ export const unusedKeys: Check = {
         }
       }
     }
-    return out;
+    return ratchet(ctx, out);
   },
 };
+
+/** With `maxUnusedKeys` set, tolerate up to that many unused keys and report only the excess as one finding. */
+function ratchet(ctx: CheckContext, found: Issue[]): Issue[] {
+  const max = ctx.config.options.maxUnusedKeys;
+  if (max === undefined) return found;
+  if (found.length > max) {
+    return [{
+      check: "unused-keys", severity: "error",
+      message: `${found.length - max} new unused translation key(s) (${found.length} unused, allowed ${max}). Remove them or use them. Latest: ${found.slice(-5).map((i) => i.key).join(", ")}`,
+      id: "unused-keys:ratchet",
+    }];
+  }
+  if (found.length < max) {
+    return [{ check: "unused-keys", severity: "warning", message: `Unused keys dropped to ${found.length}; lower options.maxUnusedKeys from ${max}.`, id: "unused-keys:ratchet-lower" }];
+  }
+  return [];
+}
+
+/** Literal mode: a key is used if any quoted string equals it (or an ancestor), or it starts with a dynamic prefix. */
+function unusedByLiterals(ctx: CheckContext): Issue[] {
+  const def = ctx.config.locales.default;
+  const exts = ctx.config.source.extensions;
+  const dirs = [...ctx.config.source.roots, ...ctx.config.options.unusedRoots];
+  const files = dirs.flatMap((d) => walk(path.join(ctx.config.root, d), exts, ctx.config.source.exclude, ctx.config.root));
+  const text = [...new Set(files)].map((f) => fs.readFileSync(path.join(ctx.config.root, f), "utf8")).join("\n");
+  const literals = new Set<string>();
+  for (const m of text.matchAll(/["'`]([A-Za-z0-9_.:-]{2,})["'`]/g)) literals.add(m[1] ?? "");
+  const prefixes = new Set<string>();
+  for (const m of text.matchAll(/`([A-Za-z0-9_.:-]+)\$\{/g)) prefixes.add(m[1] ?? "");
+  for (const m of text.matchAll(/["']([A-Za-z0-9_.:-]+\.)["']\s*\+/g)) prefixes.add(m[1] ?? "");
+  const generated = idMapKeys(ctx.config);
+  const out: Issue[] = [];
+  for (const ns of namespacesOf(ctx.config)) {
+    for (const key of Object.keys(ctx.locales.get(def)?.get(ns)?.values ?? {})) {
+      const bare = PLURAL_RE.exec(key)?.[1] ?? key;
+      const q = (k: string): string => qualify(ns, k);
+      let used = literals.has(key) || literals.has(bare) || literals.has(q(key)) || literals.has(q(bare));
+      if (!used) {
+        const segs = bare.split(".");
+        for (let i = 1; i < segs.length && !used; i++) {
+          const anc = segs.slice(0, i).join(".");
+          used = literals.has(anc) || literals.has(q(anc));
+        }
+      }
+      if (!used) for (const p of prefixes) { const x = p.includes(":") ? p.slice(p.indexOf(":") + 1) : p; if (x && (key.startsWith(x) || bare.startsWith(x))) { used = true; break; } }
+      if (!used) used = generated.some((g) => (g.ns === undefined || g.ns === ns) && g.key === bare);
+      if (!used) out.push({ check: "unused-keys", severity: "error", key: q(key), message: `Key "${q(key)}" is not referenced by any source file.`, id: `unused-keys:${q(key)}` });
+    }
+  }
+  return ratchet(ctx, out);
+}
 
 /** Ids from a routes/menu config must have a translation in every language. */
 export const idMaps: Check = {

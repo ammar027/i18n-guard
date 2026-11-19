@@ -27,16 +27,27 @@ function fileScope(framework: GuardConfig["framework"], text: string): { prefix?
   return {};
 }
 
-export function scanText(config: GuardConfig, file: string, text: string): KeyRef[] {
+/** Blank out comments (keeping newlines) so doc examples are not scanned. */
+export function stripComments(src: string): string {
+  const blank = (m: string): string => m.replace(/[^\n]/g, " ");
+  return src.replace(/\/\*[\s\S]*?\*\//g, blank).replace(/(?<![:"'`\\])\/\/[^\n]*/g, blank);
+}
+
+export function scanText(config: GuardConfig, file: string, rawText: string): KeyRef[] {
+  const text = config.source.stripComments ? stripComments(rawText) : rawText;
   const refs: KeyRef[] = [];
   const scope = fileScope(config.framework, text);
   const call = new RegExp(
     `(?<![\\w$.])(?:${config.translators})\\s*(?:<[^>()]*>)?\\(\\s*(["'\`])((?:\\\\.|(?!\\1)[^\\\\])*)\\1`,
     "g",
   );
-  const push = (index: number, raw: string, quote: string): void => {
+  const push = (index: number, raw: string, quote: string, end = 0): void => {
     let key = raw;
     let dynamic = false;
+    if (config.options.bareKeysNeedDefault && quote !== "`" && !key.includes(".") && !key.includes(":")) {
+      const after = /^\s*(,|\))\s*([^\s)]?)/.exec(text.slice(end));
+      if (!(after?.[1] === "," && /["'`{]/.test(after[2] ?? ""))) return;
+    }
     if (quote === "`" && key.includes("${")) {
       key = key.slice(0, key.indexOf("${"));
       dynamic = true;
@@ -54,7 +65,7 @@ export function scanText(config: GuardConfig, file: string, text: string): KeyRe
     if (scope.prefix) key = `${scope.prefix}.${key}`;
     refs.push({ file, line: lineOf(text, index), key, ns, dynamic });
   };
-  for (const m of text.matchAll(call)) push(m.index ?? 0, m[2] ?? "", m[1] ?? '"');
+  for (const m of text.matchAll(call)) push(m.index ?? 0, m[2] ?? "", m[1] ?? '"', (m.index ?? 0) + m[0].length);
   for (const m of text.matchAll(/i18nKey\s*=\s*\{?\s*(["'`])((?:\\.|(?!\1)[^\\])*)\1/g)) push(m.index ?? 0, m[2] ?? "", m[1] ?? '"');
   return refs;
 }
