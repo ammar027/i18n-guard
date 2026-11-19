@@ -1,53 +1,86 @@
 # i18n-guard
 
-Stop untranslated text before it ships. One package, one config, for **React / React Native (Expo) + i18next**, **Next.js (next-intl)** and **Vue (vue-i18n, beta)**.
+**Stop untranslated text before it ships.** One package and one config to catch hardcoded UI strings, missing or copied translations, broken `{{variables}}` and unknown keys. It works in the editor (ESLint), at commit time (`--staged`), in CI, and at runtime.
 
-It exists because "we have a lint rule" is not enough: untranslated copy still reaches users through attributes, ternaries, toasts, config objects, empty or copied values, wrong `{{variables}}`, and keys that were never added. Every check here maps to a real miss — see [docs/RULES.md](docs/RULES.md).
+Supports **React / React Native (Expo) + i18next**, **Next.js + next-intl**, and **Vue + vue-i18n** (beta).
 
-**Using an AI agent?** Tell it: "Follow [AGENTS.md](AGENTS.md) to set up i18n-guard in this project."
+> Using an AI agent? Tell it: *"Follow [AGENTS.md](AGENTS.md) to set up i18n-guard in this project."*
+
+## Why
+
+A single lint rule is not enough. Untranslated copy still reaches users through attributes, ternaries, toasts, config objects, empty or copied values, wrong variables and keys that were never added. Each check below comes from a real miss; see [docs/RULES.md](docs/RULES.md).
 
 ## Quick start
 
 ```bash
 npm i -D i18n-guard eslint
-npx i18n-guard init        # detects framework + locale folder, writes config, CI workflow, hook, Claude skill
+npx i18n-guard init        # detects framework + locale folder; writes config, CI workflow, hook, Claude skill
 npx i18n-guard check       # see the backlog
-npx i18n-guard baseline    # accept it: only NEW problems fail from now on
+npx i18n-guard baseline    # accept it: from now on only NEW problems fail
 ```
 
-Add the ESLint preset (hardcoded text, attributes, toasts, template literals, English fallbacks, `as any` keys):
+Add the ESLint preset to `eslint.config.js`:
 
 ```js
-// eslint.config.js
-import { reactNative } from "i18n-guard/eslint"; // or: react, next, vue
+import { reactNative } from "i18n-guard/eslint"; // react | reactNative | next | vue
 export default [...yourConfig, ...reactNative({ allowStrings: ["Acme"] })];
 ```
 
-## Checks
+Then add `npx i18n-guard check --staged` to your pre-commit hook and `check --strict` to CI (`init` writes both).
 
-| Check | Catches |
+## What it catches
+
+| Check | Example it catches |
 |---|---|
-| `eslint` | hardcoded JSX text, visible attributes, ternary / `||` text, `Alert`/toast strings, template literals, `t("k") \|\| "English"`, `t("k" as any)`, hardcoded object-literal copy |
-| `parity` | key missing in a language, missing file, stray keys |
+| `eslint` | `<Text>Documents</Text>`, `placeholder="Search"`, `cond ? "Yes" : t("x")`, `toast("Saved")`, `` title={`Hi ${n}`} ``, `t("k") \|\| "English"`, `t("k" as any)`, `{ label: "Documents" }` |
+| `parity` | key or file missing in a language |
 | `untranslated` | value still identical to the default language |
-| `placeholders` | key name as text, generic "Title/Titel", English fragments, `[TODO]` |
-| `variables` | `{{var}}` differs from the default language |
-| `hygiene` | empty values, duplicate JSON keys, plural gaps, stray whitespace, forbidden characters (e.g. `ß` for Swiss German) |
-| `missing-keys` | `t("x")` where `x` is not in the default locale (multi-line, `defaultValue`, `as any`, `ns:key`, `<Trans i18nKey>`) |
-| `unused-keys` | keys nobody references (ratchet via baseline) |
-| `id-maps` | ids from a routes/menu config without translation (`navigation.<id>`) |
+| `placeholders` | key name as text, "Titel", English fragments, `[TODO]` |
+| `variables` | `{{name}}` in English but `{{section}}` in German |
+| `hygiene` | empty values, duplicate JSON keys, plural gaps, stray spaces, forbidden characters (e.g. `ß` for Swiss German) |
+| `missing-keys` | `t("x")` where `x` is in no locale (multi-line, `defaultValue`, `ns:key`, `<Trans i18nKey>`) |
+| `unused-keys` | keys nobody references |
+| `id-maps` | a route/menu id with no translation (`navigation.<id>`) |
 
-Run `npx i18n-guard checks` for the list. Baselines, `--staged` fast mode, `--strict`, and `markdown | json | sarif` reports are built in.
+List them with `npx i18n-guard checks`.
 
-## Runtime: report missing keys users actually hit
+## Commands
+
+| Command | Does |
+|---|---|
+| `init` | write config, workflow, hook and agent skill for your stack |
+| `check` | run the checks; exit 1 on a new error. `--strict` also fails on warnings, `--staged` checks only staged files, `--only a,b`, `--format console\|markdown\|json\|sarif`, `--output file` |
+| `baseline` | record current findings so only new ones fail ([docs](docs/BASELINES.md)) |
+| `report` | markdown report to `i18n-guard-report.md` |
+| `doctor` | verify config, locale files and tooling |
+
+## Runtime: catch keys users actually hit
 
 ```ts
 import { installMissingKeyReporter } from "i18n-guard/runtime";
 installMissingKeyReporter(i18n, { report: (e) => Sentry.captureMessage(`i18n missing ${e.namespace}:${e.key}`) });
 ```
-i18next only calls this for keys that exist in **no** language; a language silently falling back to English is caught by `parity`/`untranslated` at build time. `pseudoLocalize()` / `pseudoPostProcessor` help QA spot hardcoded runtime text.
+
+i18next reports only keys missing in **every** language; a language silently falling back to English is caught at build time by `parity`/`untranslated`. `pseudoLocalize()` helps QA spot hardcoded runtime text ([docs](docs/RUNTIME.md)).
+
+## Examples
+
+[`examples/`](examples) has a minimal Expo, Next.js and Vue project, each with a clean state that passes and a planted-bug state that fails. They run as tests, so they stay true.
 
 ## Docs
-[ADOPTION](docs/ADOPTION.md) · [CONFIG](docs/CONFIG.md) · [BASELINES](docs/BASELINES.md) · [RUNTIME](docs/RUNTIME.md) · [RULES](docs/RULES.md)
 
-Vue support is **beta** (template rule + scanner; not battle-tested). MIT licensed.
+[Adoption](docs/ADOPTION.md) · [Config reference](docs/CONFIG.md) · [Baselines](docs/BASELINES.md) · [Runtime](docs/RUNTIME.md) · [Rules: incident → check](docs/RULES.md) · [AGENTS.md](AGENTS.md)
+
+## Status
+
+React / React Native + i18next is the most proven. next-intl is covered by tests and an example. Vue is **beta**: template strings via `eslint-plugin-vue` and the key scanner, not yet battle-tested.
+
+## Development
+
+```bash
+npm install     # also builds
+npm test        # unit tests, ESLint preset tests, CLI test, all example states
+npm run check:private   # sanitise gate before publishing
+```
+
+MIT licensed.

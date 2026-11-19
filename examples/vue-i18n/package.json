@@ -1,0 +1,1 @@
+{ "name": "example-vue-i18n", "private": true, "type": "module", "scripts": { "check:i18n": "i18n-guard check --strict" }, "devDependencies": { "i18n-guard": "*", "eslint": "^9.0.0", "eslint-plugin-vue": "^9.0.0", "vue-eslint-parser": "^9.0.0" } }

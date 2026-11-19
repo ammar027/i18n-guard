@@ -1,0 +1,1 @@
+{ "welcome": "Welcome back, {{name}}", "save": "Save changes", "search": { "placeholder": "Search documents" }, "documents_one": "{{count}} document", "documents_other": "{{count}} documents" }

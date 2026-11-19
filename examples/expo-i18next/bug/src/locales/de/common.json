@@ -1,0 +1,1 @@
+{ "welcome": "Willkommen zurück, {{section}}", "save": "Änderungen speichern", "search": { "placeholder": "Dokumente durchsuchen" }, "documents_one": "{{count}} Dokument", "documents_other": "{{count}} Dokumente" }

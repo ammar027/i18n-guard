@@ -1,0 +1,6 @@
+{
+  "framework": "next-intl",
+  "locales": { "dir": "messages", "default": "en", "languages": ["en", "de"] },
+  "source": { "roots": ["src"] },
+  "checks": { "eslint": true }
+}

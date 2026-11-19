@@ -1,0 +1,5 @@
+{
+  "framework": "vue-i18n",
+  "locales": { "dir": "src/locales", "default": "en", "languages": ["en", "de"] },
+  "checks": { "eslint": true }
+}

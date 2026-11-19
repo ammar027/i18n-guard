@@ -1,0 +1,6 @@
+{
+  "framework": "react-i18next",
+  "locales": { "dir": "src/locales", "default": "en", "languages": ["en", "de"], "namespaces": ["common"] },
+  "checks": { "eslint": true },
+  "options": { "forbiddenChars": { "de": ["ß"] } }
+}

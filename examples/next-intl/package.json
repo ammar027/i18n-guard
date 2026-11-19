@@ -1,0 +1,1 @@
+{ "name": "example-next-intl", "private": true, "type": "module", "scripts": { "check:i18n": "i18n-guard check --strict" }, "devDependencies": { "i18n-guard": "*", "eslint": "^9.0.0" } }
