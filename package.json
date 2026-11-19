@@ -1,0 +1,73 @@
+{
+  "name": "i18n-guard",
+  "version": "0.1.0",
+  "description": "Stop untranslated text before it ships: ESLint rules, locale checks, key scanners, baselines, hooks and CI for i18next, next-intl and vue-i18n projects.",
+  "type": "module",
+  "license": "MIT",
+  "keywords": [
+    "i18n",
+    "i18next",
+    "react-native",
+    "expo",
+    "next-intl",
+    "vue-i18n",
+    "eslint",
+    "translations",
+    "lint"
+  ],
+  "bin": {
+    "i18n-guard": "dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./eslint": {
+      "types": "./dist/eslint/index.d.ts",
+      "default": "./dist/eslint/index.js"
+    },
+    "./runtime": {
+      "types": "./dist/runtime/index.d.ts",
+      "default": "./dist/runtime/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "templates",
+    "docs",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test test/*.test.ts",
+    "check:private": "node scripts/check-private-strings.mjs",
+    "prepare": "npm run build"
+  },
+  "peerDependencies": {
+    "eslint": ">=9"
+  },
+  "peerDependenciesMeta": {
+    "eslint": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "eslint-plugin-i18next": "^6.1.1",
+    "typescript-eslint": "^8.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "eslint": "^9.0.0",
+    "eslint-plugin-vue": "^10.12.1",
+    "i18next": "^25.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "vue-eslint-parser": "^10.4.2"
+  }
+}
