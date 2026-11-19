@@ -19,3 +19,5 @@
 | Array has 3 items in English, 1 in German; string vs list | `types` |
 | `{{name}` typo or ICU plural without `other` crashes or prints raw | `syntax` |
 | Locale files reorder randomly, noisy diffs and merge conflicts | `sorted-keys` + `--fix` |
+| A language ships half-translated | `coverage` + `minCoverage`, `required` languages |
+| A one-off exception hides forever in the baseline | inline `i18n-guard-ignore-*` with a reason (reported when stale) |

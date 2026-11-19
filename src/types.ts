@@ -39,6 +39,8 @@ export interface GuardConfig {
     readonly default: string;
     /** Every language including the default. */
     readonly languages: readonly string[];
+    /** Languages that must be complete. Findings in any other language are downgraded to warnings. Empty = all languages are required. */
+    readonly required: readonly string[];
     /** Namespaces to check (namespaced layout). Empty = every json file in the default language. */
     readonly namespaces: readonly string[];
   };
@@ -66,6 +68,8 @@ export interface GuardConfig {
     readonly syntax: boolean;
     /** Opt-in: keys must be in ascending order (fix with `check --fix`). */
     readonly sortedKeys: boolean;
+    /** Enforces options.minCoverage (no-op when it is not set). */
+    readonly coverage: boolean;
     readonly eslint: boolean;
   };
   readonly options: {
@@ -84,6 +88,8 @@ export interface GuardConfig {
     /** Warn about keys that exist in a language but not in the default (default true). */
     readonly extraKeys: boolean;
     /** Message grammar to validate: `auto` picks by framework (i18next `{{x}}`, ICU for next-intl, `{x}` braces for vue-i18n). */
+    /** Minimum translated share (0-100) per language; a number for all, or a map per language. */
+    readonly minCoverage?: number | Readonly<Record<string, number>>;
     readonly messageSyntax: "auto" | "i18next" | "icu" | "braces" | "off";
     /** A dotless key such as t("total") only counts as a translation key when a default follows (default false). */
     readonly bareKeysNeedDefault: boolean;

@@ -35,3 +35,9 @@
 ```
 
 Monorepos: list one `eslint` entry per app (each with its own `eslint.config.*`). Locale checks run once.
+
+## Required languages, coverage and inline ignores
+
+- `locales.required`: languages that must be complete (the default language is always required). Findings in any other language are warnings, so `check` passes and `--strict` still shows them. Empty means every language is required.
+- `options.minCoverage`: number or `{ "<lang>": number }`. Coverage = share of default-language string keys that are present, non-empty and not a copy of the default (unless allowed). Enforced by the `coverage` check; see it with `i18n-guard status`.
+- Inline ignore in source files: `i18n-guard-ignore-next-line` or `i18n-guard-ignore-line`, optionally followed by check names (`eslint,missing-keys`), then `-- reason`. No reason or an unknown check is an error; a marker that no longer suppresses anything is a warning.

@@ -204,3 +204,46 @@ test("sorted-keys --fix leaves files with duplicate keys untouched", async () =>
   const r = await runGuard(cfg(root, { checks: { sortedKeys: true } }), { noBaseline: true, fix: true });
   assert.deepEqual(r.fixed, ["src/locales/en/common.json"]);
 });
+
+const PARTIAL = { "src/locales/de/common.json": { save: "Änderungen speichern", greeting: "Hallo {{name}}", items_one: "{{count}} Eintrag" } };
+
+test("required locales: findings in optional languages are warnings, required stay errors", async () => {
+  const files = { ...PARTIAL, "src/locales/fr/common.json": { save: "Enregistrer les modifications" } };
+  const extra = { locales: { languages: ["en", "de", "fr"], required: ["en", "de"] } };
+  const i = await run(files, extra);
+  const fr = byCheck(i, "parity").filter((x) => x.locale === "fr");
+  assert.ok(fr.length > 0 && fr.every((x) => x.severity === "warning"));
+  assert.ok(byCheck(i, "parity").filter((x) => x.locale === "de").every((x) => x.severity === "error") || byCheck(i, "parity").every((x) => x.locale !== "de"));
+  const all = await run(files, { locales: { languages: ["en", "de", "fr"] } });
+  assert.ok(byCheck(all, "parity").filter((x) => x.locale === "fr").every((x) => x.severity === "error"));
+});
+
+test("coverage: minCoverage gate, per-language map, copies count as untranslated", async () => {
+  const files = { "src/locales/de/common.json": { save: "Änderungen speichern", greeting: "Hello {{name}}", items_one: "{{count}} Eintrag", items_other: "{{count}} Einträge" } };
+  const low = byCheck(await run(files, { options: { minCoverage: 100 } }), "coverage");
+  assert.equal(low.length, 1);
+  assert.match(low[0]?.message ?? "", /75%/);
+  assert.equal(byCheck(await run(files, { options: { minCoverage: { de: 70 } } }), "coverage").length, 0);
+  assert.equal(byCheck(await run(files, {}), "coverage").length, 0);
+});
+
+test("inline ignore: suppresses with a reason, needs a reason, stale when unused, check scoping", async () => {
+  const src = [
+    "// i18n-guard-ignore-next-line -- legacy key kept for old clients",
+    't("ghost.one");',
+    't("ghost.two"); // i18n-guard-ignore-line missing-keys -- generated at runtime',
+    "// i18n-guard-ignore-next-line",
+    't("ghost.three");',
+    "// i18n-guard-ignore-next-line parity -- wrong check scope",
+    't("ghost.four");',
+    "// i18n-guard-ignore-next-line -- nothing below needs this",
+    't("common:save");',
+    "// i18n-guard-ignore-next-line nope -- unknown check",
+  ].join("\n");
+  const i = await run({ "src/B.tsx": src });
+  const missing = byCheck(i, "missing-keys").map((x) => x.key).sort();
+  assert.deepEqual(missing, ["ghost.four", "ghost.three"]);
+  const ign = byCheck(i, "ignore").map((x) => `${x.severity}:${x.id.split(":").pop()}`).sort();
+  // two stale markers: the one above a translated key, and the parity-scoped one that cannot match a missing-keys finding
+  assert.deepEqual(ign, ["error:reason", "error:unknown", "warning:unused", "warning:unused"]);
+});

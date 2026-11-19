@@ -23,7 +23,7 @@ const ALLOW_SAME = ["IBAN", "No", "Logo", "Plan", "Avatar", "General", "Color", 
 export const DEFAULTS: GuardConfig = {
   root: ".",
   framework: "react-i18next",
-  locales: { dir: "src/locales", layout: "namespaced", default: "en", languages: ["en"], namespaces: [] },
+  locales: { dir: "src/locales", layout: "namespaced", default: "en", languages: ["en"], required: [], namespaces: [] },
   source: {
     roots: ["src"],
     extensions: [".ts", ".tsx", ".js", ".jsx", ".mts", ".vue"],
@@ -33,7 +33,7 @@ export const DEFAULTS: GuardConfig = {
   translators: "t|i18n\\.t|i18next\\.t",
   checks: {
     parity: true, untranslated: true, placeholders: true, variables: true, hygiene: true,
-    missingKeys: true, unusedKeys: true, idMaps: true, types: true, syntax: true, sortedKeys: false, eslint: false,
+    missingKeys: true, unusedKeys: true, idMaps: true, types: true, syntax: true, sortedKeys: false, coverage: true, eslint: false,
   },
   options: {
     allowSameAsDefault: ALLOW_SAME,

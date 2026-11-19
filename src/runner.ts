@@ -5,12 +5,15 @@ import { loadLocales } from "./locales.js";
 import { hygiene, parity, placeholders, untranslated, variables } from "./checks/locale.js";
 import { idMaps, missingKeys, unusedKeys } from "./checks/keys.js";
 import { eslintCheck } from "./checks/eslint.js";
+import { coverage } from "./checks/coverage.js";
+import { applyInlineIgnores } from "./ignore.js";
+import { isRequired } from "./checks/coverage.js";
 import { fixSortedKeys, sortedKeys, syntax, types } from "./checks/structure.js";
 
 type Flag = keyof GuardConfig["checks"];
 export const CHECKS: ReadonlyArray<readonly [Flag, Check]> = [
   ["parity", parity], ["untranslated", untranslated], ["placeholders", placeholders], ["variables", variables],
-  ["hygiene", hygiene], ["missingKeys", missingKeys], ["unusedKeys", unusedKeys], ["idMaps", idMaps], ["types", types], ["syntax", syntax], ["sortedKeys", sortedKeys], ["eslint", eslintCheck],
+  ["hygiene", hygiene], ["missingKeys", missingKeys], ["unusedKeys", unusedKeys], ["idMaps", idMaps], ["types", types], ["syntax", syntax], ["sortedKeys", sortedKeys], ["coverage", coverage], ["eslint", eslintCheck],
 ];
 
 export interface RunOptions {
@@ -51,21 +54,25 @@ export async function runGuard(config: GuardConfig, opts: RunOptions = {}): Prom
   for (const [flag, check] of CHECKS) {
     const wanted = opts.only?.length ? opts.only.includes(check.name) : config.checks[flag];
     if (!wanted) continue;
-    if (staged && check.wholeProject && !opts.only?.includes(check.name) && !["parity", "untranslated", "placeholders", "variables", "hygiene"].includes(check.name)) {
+    if (staged && check.wholeProject && !opts.only?.includes(check.name) && !["parity", "untranslated", "placeholders", "variables", "hygiene", "coverage"].includes(check.name)) {
       skipped.push(check.name);
       continue;
     }
     raw.push(...(await check.run(ctx)));
     ran.push(check.name);
   }
+  // Optional locales: findings that belong to a non-required language are warnings.
+  const leveled: Issue[] = raw.map((i) => (i.locale && i.severity === "error" && !isRequired(config, i.locale) ? { ...i, severity: "warning" as const } : i));
+  // Inline `i18n-guard-ignore` comments.
+  const afterIgnore = applyInlineIgnores(config, leveled, CHECKS.map(([, c]) => c.name), { staged: staged !== null, ran });
   if (opts.updateBaseline) {
-    const n = writeBaseline(config, raw.filter((i) => i.severity === "error"));
+    const n = writeBaseline(config, afterIgnore.filter((i) => i.severity === "error" && i.check !== "ignore"));
     return { issues: [], baselined: 0, ran, skipped, failed: false, baselineWritten: n };
   }
-  let issues = raw;
+  let issues = afterIgnore;
   let baselined = 0;
   if (!opts.noBaseline) {
-    const a = applyBaseline(raw, loadBaseline(config), new Set(staged ? [] : ran));
+    const a = applyBaseline(afterIgnore, loadBaseline(config), new Set(staged ? [] : ran));
     issues = a.issues;
     baselined = a.baselined;
     for (const id of a.stale) {

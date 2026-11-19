@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { findConfig, loadConfig, PRESETS } from "../config.js";
 import { loadLocales } from "../locales.js";
 import { CHECKS, runGuard } from "../runner.js";
+import { computeCoverage } from "../checks/coverage.js";
 import { render, type Format } from "../reporters/index.js";
 import type { Framework } from "../types.js";
 
@@ -14,6 +15,7 @@ const HELP = `i18n-guard — stop untranslated text before it ships
                    [--output file] [--no-baseline] [--fix] [--config path]
   i18n-guard baseline            Record current findings so only NEW ones fail
   i18n-guard report              Same as check --format markdown --output i18n-guard-report.md
+  i18n-guard status [--format console|json]   Translated share per language vs options.minCoverage
   i18n-guard doctor              Verify config, locale files and tooling
   i18n-guard checks              List checks
 
@@ -124,6 +126,16 @@ export async function main(argv: string[]): Promise<number> {
   if (cmd === "checks") { for (const [, c] of CHECKS) console.log(`${c.name.padEnd(14)} ${c.description}`); return 0; }
   if (cmd === "init") return init(cwd, flags);
   if (cmd === "doctor") return doctor(cwd, str("config"));
+  if (cmd === "status") {
+    const config = await loadConfig(cwd, str("config"));
+    const rows = computeCoverage({ config, locales: loadLocales(config), staged: null });
+    if (str("format") === "json") { console.log(JSON.stringify(rows, null, 2)); return 0; }
+    console.log("language  translated   %      required  min");
+    for (const r of rows) console.log(`${r.lang.padEnd(9)} ${`${r.translated}/${r.total}`.padEnd(12)} ${`${r.percent}%`.padEnd(6)} ${(r.required ? "yes" : "no").padEnd(9)} ${r.min === undefined ? "-" : `${r.min}%`}`);
+    const low = rows.filter((r) => r.min !== undefined && r.percent < r.min);
+    if (low.length) console.log(`\nBelow minimum: ${low.map((r) => r.lang).join(", ")}${low.some((r) => !r.required) ? " (optional languages only warn in check)" : ""}`);
+    return 0;
+  }
   if (cmd === "check" || cmd === "baseline" || cmd === "report") {
     const config = await loadConfig(cwd, str("config"));
     if (cmd === "baseline") {

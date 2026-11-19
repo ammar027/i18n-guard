@@ -29,8 +29,12 @@ i18n-guard blocks untranslated text: hardcoded UI strings, missing/empty/copied 
 - Before finishing any change that touches UI text or locale files: `npx i18n-guard check --staged`, then `npx i18n-guard check --strict` for large changes.
 - To fix findings, follow `.claude/skills/i18n-fix/SKILL.md` (installed by `init`).
 
+## Exceptions
+
+To accept one finding in source use `// i18n-guard-ignore-next-line -- reason` (reason required). Do not use it to hide a real untranslated string. Check `i18n-guard status` before finishing work that adds keys.
+
 ## Commands
 
-`init` · `check [--strict] [--staged] [--fix] [--only a,b] [--format console|markdown|json|sarif] [--output file]` · `baseline` · `report` · `doctor` · `checks`
+`status` · `init` · `check [--strict] [--staged] [--fix] [--only a,b] [--format console|markdown|json|sarif] [--output file]` · `baseline` · `report` · `doctor` · `checks`
 
 Docs: README.md, docs/ADOPTION.md, docs/CONFIG.md, docs/BASELINES.md, docs/RUNTIME.md, docs/RULES.md.

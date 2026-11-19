@@ -22,7 +22,7 @@ function ignored(ctx: CheckContext, ns: string, key: string): boolean {
   return ig.includes(key) || ig.includes(qualify(ns, key));
 }
 
-function falsePositive(ctx: CheckContext, key: string, en: string): boolean {
+export function falsePositive(ctx: CheckContext, key: string, en: string): boolean {
   const o = ctx.config.options;
   const v = en.trim();
   if (o.allowSameAsDefault.includes(en) || v.length <= 2) return true;

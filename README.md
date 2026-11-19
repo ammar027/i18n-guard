@@ -44,6 +44,7 @@ Then add `npx i18n-guard check --staged` to your pre-commit hook and `check --st
 | `sorted-keys` | opt-in: keys not in ascending order; `check --fix` rewrites the files |
 | `unused-keys` | keys nobody references |
 | `id-maps` | a route/menu id with no translation (`navigation.<id>`) |
+| `coverage` | a language below `options.minCoverage` (translated share; copies of the default text do not count) |
 
 List them with `npx i18n-guard checks`.
 
@@ -55,7 +56,25 @@ List them with `npx i18n-guard checks`.
 | `check` | run the checks; exit 1 on a new error. `--strict` also fails on warnings, `--staged` checks only staged files, `--fix` sorts keys (when `sortedKeys` is on), `--only a,b`, `--format console\|markdown\|json\|sarif`, `--output file` |
 | `baseline` | record current findings so only new ones fail ([docs](docs/BASELINES.md)) |
 | `report` | markdown report to `i18n-guard-report.md` |
+| `status` | translated share per language vs `options.minCoverage` and required/optional languages |
 | `doctor` | verify config, locale files and tooling |
+
+## Required vs optional languages, coverage, inline ignores
+
+```jsonc
+{ "locales": { "required": ["en", "de"] },            // other languages only warn
+  "options": { "minCoverage": { "de": 100, "fr": 90 } } } // or a single number
+```
+
+Accept a single finding in source, with a mandatory reason; unused markers are reported as stale:
+
+```tsx
+// i18n-guard-ignore-next-line -- brand name, not copy
+<Text>Acme</Text>
+const k = t("legacy.key"); // i18n-guard-ignore-line missing-keys -- generated at runtime
+```
+
+Locale JSON cannot hold comments: use `options.ignoreKeys` there.
 
 ## Runtime: catch keys users actually hit
 
