@@ -33,7 +33,11 @@ i18n-guard blocks untranslated text: hardcoded UI strings, missing/empty/copied 
 
 To accept one finding in source use `// i18n-guard-ignore-next-line -- reason` (reason required). Do not use it to hide a real untranslated string. Check `i18n-guard status` before finishing work that adds keys.
 
-## Adding keys to other languages\n\nRun `npx i18n-guard sync` (dry run), then `--write`. Synced values carry a `[TODO]` prefix: translate every one (real translations, never the English text) before finishing; `check --strict` fails while any remain.\n\n## Commands
+## Adding keys to other languages
+
+Run `npx i18n-guard sync` (dry run), then `--write`. Synced values carry a `[TODO]` prefix: translate every one (real translations, never the English text) before finishing; `check --strict` fails while any remain.
+
+## Commands
 
 `sync [--write] [--prune]` · `status` · `init` · `check [--strict] [--staged] [--fix] [--only a,b] [--format console|markdown|json|sarif] [--output file]` · `baseline` · `report` · `doctor` · `checks`
 
