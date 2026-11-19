@@ -1,0 +1,14 @@
+name: i18n-guard
+on:
+  pull_request:
+    paths: ["**/locales/**", "**/messages/**", "src/**", "app/**", "i18n-guard.*"]
+jobs:
+  i18n:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npx i18n-guard check --strict

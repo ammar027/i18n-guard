@@ -1,0 +1,3 @@
+#!/bin/sh
+# Add this line to your .husky/pre-commit (or call this file from it).
+npx --no-install i18n-guard check --staged || exit 1
