@@ -1,6 +1,6 @@
 {
   "name": "i18n-guard",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Stop untranslated text before it ships: ESLint rules, locale checks, key scanners, baselines, hooks and CI for i18next, next-intl and vue-i18n projects.",
   "type": "module",
   "license": "MIT",
