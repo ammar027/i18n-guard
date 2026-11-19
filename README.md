@@ -39,6 +39,9 @@ Then add `npx i18n-guard check --staged` to your pre-commit hook and `check --st
 | `variables` | `{{name}}` in English but `{{section}}` in German |
 | `hygiene` | empty values, duplicate JSON keys, plural gaps, stray spaces, forbidden characters (e.g. `ß` for Swiss German) |
 | `missing-keys` | `t("x")` where `x` is in no locale (multi-line, `defaultValue`, `ns:key`, `<Trans i18nKey>`) |
+| `types` | a key is a string in one language but an array/object in another, or array lengths differ |
+| `syntax` | broken messages: unbalanced `{{`/`{`, ICU `plural`/`select` without `other` (grammar picked per framework) |
+| `sorted-keys` | opt-in: keys not in ascending order; `check --fix` rewrites the files |
 | `unused-keys` | keys nobody references |
 | `id-maps` | a route/menu id with no translation (`navigation.<id>`) |
 
@@ -49,7 +52,7 @@ List them with `npx i18n-guard checks`.
 | Command | Does |
 |---|---|
 | `init` | write config, workflow, hook and agent skill for your stack |
-| `check` | run the checks; exit 1 on a new error. `--strict` also fails on warnings, `--staged` checks only staged files, `--only a,b`, `--format console\|markdown\|json\|sarif`, `--output file` |
+| `check` | run the checks; exit 1 on a new error. `--strict` also fails on warnings, `--staged` checks only staged files, `--fix` sorts keys (when `sortedKeys` is on), `--only a,b`, `--format console\|markdown\|json\|sarif`, `--output file` |
 | `baseline` | record current findings so only new ones fail ([docs](docs/BASELINES.md)) |
 | `report` | markdown report to `i18n-guard-report.md` |
 | `doctor` | verify config, locale files and tooling |

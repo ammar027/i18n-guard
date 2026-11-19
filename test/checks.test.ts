@@ -156,3 +156,51 @@ test("parity: stray key warns, extraKeys:false silences it", async () => {
   assert.equal(byCheck(await run(files), "parity").filter((x) => x.severity === "warning").length, 1);
   assert.equal(byCheck(await run(files, { options: { extraKeys: false } }), "parity").length, 0);
 });
+
+test("types: string vs array vs object, array length", async () => {
+  const mkFiles = (en: object, de: object) => ({ "src/locales/en/common.json": { save: "Save changes", greeting: "Hello {{name}}", items_one: "{{count}} item", items_other: "{{count}} items", ...en }, "src/locales/de/common.json": { save: "Speichern", greeting: "Hallo {{name}}", items_one: "{{count}} E", items_other: "{{count}} Es", ...de } });
+  const i = byCheck(await run(mkFiles({ steps: ["One step", "Two steps"], a: "Plain text", obj: { x: "Nested value" } }, { steps: ["Ein Schritt"], a: ["Liste"], obj: "Einfacher Text" })), "types");
+  const m = i.map((x) => `${x.key}|${x.message}`).join("\n");
+  assert.match(m, /common:steps\|.*2 item.*1/);
+  assert.match(m, /common:a\|.*string.*array/);
+  assert.match(m, /common:obj\|.*object here, de has a value/);
+});
+
+test("syntax: i18next braces, ICU plural without other, vue braces", async () => {
+  const { messageProblem } = await import("../src/checks/structure.js");
+  assert.equal(messageProblem("Hello {{name}}, {{count, number}} $t(a.b)", "i18next"), null);
+  assert.match(messageProblem("Hello {{name}", "i18next") ?? "", /brace/);
+  assert.match(messageProblem("Hello {name}}", "i18next") ?? "", /brace/);
+  assert.equal(messageProblem("{n, plural, one {# item} other {# items}}", "icu"), null);
+  assert.match(messageProblem("{n, plural, one {# item}}", "icu") ?? "", /other/);
+  assert.match(messageProblem("{n, plural, one {# item} other {# items}", "icu") ?? "", /Unclosed/);
+  assert.equal(messageProblem("It''s {name}", "icu"), null);
+  assert.match(messageProblem("Hi {name", "braces") ?? "", /brace/);
+  const i = await run({ "src/locales/de/common.json": { save: "Speichern", greeting: "Hallo {{name}", items_one: "{{count}} E", items_other: "{{count}} Es" } });
+  assert.equal(byCheck(i, "syntax").length, 1);
+});
+
+test("sorted-keys: opt-in, reports unsorted, --fix rewrites and then passes", async () => {
+  const { project, cfg, BASE_FILES } = await import("./helpers.js");
+  const { runGuard } = await import("../src/runner.js");
+  const fs = await import("node:fs");
+  const root = project({ ...BASE_FILES, "src/locales/de/common.json": { save: "Änderungen speichern", items_one: "{{count}} Eintrag", greeting: "Hallo {{name}}", items_other: "{{count}} Einträge" } });
+  assert.equal(byCheck((await runGuard(cfg(root), { noBaseline: true })).issues, "sorted-keys").length, 0, "off by default");
+  const c = cfg(root, { checks: { sortedKeys: true } });
+  assert.ok(byCheck((await runGuard(c, { noBaseline: true })).issues, "sorted-keys").length > 0);
+  const fixed = await runGuard(c, { noBaseline: true, fix: true });
+  assert.deepEqual(fixed.fixed?.sort(), ["src/locales/de/common.json", "src/locales/en/common.json"]);
+  assert.equal(byCheck(fixed.issues, "sorted-keys").length, 0);
+  const keys = Object.keys(JSON.parse(fs.readFileSync(`${root}/src/locales/de/common.json`, "utf8")) as object);
+  assert.deepEqual(keys, [...keys].sort());
+  const again = await runGuard(c, { noBaseline: true, fix: true });
+  assert.deepEqual(again.fixed, []);
+});
+
+test("sorted-keys --fix leaves files with duplicate keys untouched", async () => {
+  const { project, cfg, BASE_FILES } = await import("./helpers.js");
+  const { runGuard } = await import("../src/runner.js");
+  const root = project({ ...BASE_FILES, "src/locales/de/common.json": '{ "save": "A", "greeting": "B", "save": "C", "items_one": "x", "items_other": "y" }' });
+  const r = await runGuard(cfg(root, { checks: { sortedKeys: true } }), { noBaseline: true, fix: true });
+  assert.deepEqual(r.fixed, ["src/locales/en/common.json"]);
+});

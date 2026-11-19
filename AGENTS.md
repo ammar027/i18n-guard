@@ -31,6 +31,6 @@ i18n-guard blocks untranslated text: hardcoded UI strings, missing/empty/copied 
 
 ## Commands
 
-`init` · `check [--strict] [--staged] [--only a,b] [--format console|markdown|json|sarif] [--output file]` · `baseline` · `report` · `doctor` · `checks`
+`init` · `check [--strict] [--staged] [--fix] [--only a,b] [--format console|markdown|json|sarif] [--output file]` · `baseline` · `report` · `doctor` · `checks`
 
 Docs: README.md, docs/ADOPTION.md, docs/CONFIG.md, docs/BASELINES.md, docs/RUNTIME.md, docs/RULES.md.

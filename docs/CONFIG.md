@@ -14,14 +14,19 @@
   },
   "source": { "roots": ["src"], "extensions": [".ts", ".tsx"], "exclude": ["__tests__"] },
   "translators": "t|i18n\\.t",              // regex source for translator identifiers (t, tCommon, $t ...)
-  "checks": { "eslint": true, "unusedKeys": true },   // toggle any check
+  "checks": { "eslint": true, "unusedKeys": true, "sortedKeys": true },   // toggle any check (types, syntax on by default; sortedKeys opt-in)
   "options": {
     "allowSameAsDefault": ["IBAN", "PDF"],  // identical-by-design values
     "neutralWordMaxLength": 12,             // single words up to this length are international terms
     "forbiddenChars": { "de": ["ß"] },      // e.g. Swiss German: "ss" only
     "mustTranslate": ["save", "cancel"],    // English UI words never valid in other locales
     "genericWords": { "de": ["titel"] },    // "Title" words that must not be shown as copy
-    "ignoreKeys": ["admin:profile.header.title"]
+    "ignoreKeys": ["admin:profile.header.title"],
+    "messageSyntax": "auto",                // auto | i18next | icu | braces | off
+    "extraKeys": true,                      // warn about keys not in the default language
+    "bareKeysNeedDefault": false,           // t("total") only counts as a key when a default follows
+    "unusedMode": "calls",                  // or "literals" (any quoted string counts as use)
+    "maxUnusedKeys": 390                    // ratchet instead of per-key baselining
   },
   "idMaps": [{ "file": "src/routes.ts", "idPattern": "id: \"(\\w+)\"", "keyTemplate": "navigation.{id}" }],
   "eslint": [{ "cwd": "apps/web", "files": ["src/**/*.{ts,tsx}"], "messageMatch": [], "ruleIds": [] }],

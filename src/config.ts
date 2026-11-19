@@ -33,7 +33,7 @@ export const DEFAULTS: GuardConfig = {
   translators: "t|i18n\\.t|i18next\\.t",
   checks: {
     parity: true, untranslated: true, placeholders: true, variables: true, hygiene: true,
-    missingKeys: true, unusedKeys: true, idMaps: true, eslint: false,
+    missingKeys: true, unusedKeys: true, idMaps: true, types: true, syntax: true, sortedKeys: false, eslint: false,
   },
   options: {
     allowSameAsDefault: ALLOW_SAME,
@@ -43,6 +43,7 @@ export const DEFAULTS: GuardConfig = {
     genericWords: GENERIC_WORDS,
     ignoreKeys: [],
     extraKeys: true,
+    messageSyntax: "auto",
     bareKeysNeedDefault: false,
     unusedMode: "calls",
     unusedRoots: [],

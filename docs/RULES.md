@@ -16,3 +16,6 @@
 | Menu item added to routes, translation forgotten | `id-maps` |
 | Dead keys pile up | `unused-keys` |
 | A key that exists nowhere reaches production | `runtime` reporter |
+| Array has 3 items in English, 1 in German; string vs list | `types` |
+| `{{name}` typo or ICU plural without `other` crashes or prints raw | `syntax` |
+| Locale files reorder randomly, noisy diffs and merge conflicts | `sorted-keys` + `--fix` |

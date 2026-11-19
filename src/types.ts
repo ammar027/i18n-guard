@@ -62,6 +62,10 @@ export interface GuardConfig {
     readonly missingKeys: boolean;
     readonly unusedKeys: boolean;
     readonly idMaps: boolean;
+    readonly types: boolean;
+    readonly syntax: boolean;
+    /** Opt-in: keys must be in ascending order (fix with `check --fix`). */
+    readonly sortedKeys: boolean;
     readonly eslint: boolean;
   };
   readonly options: {
@@ -79,6 +83,8 @@ export interface GuardConfig {
     readonly ignoreKeys: readonly string[];
     /** Warn about keys that exist in a language but not in the default (default true). */
     readonly extraKeys: boolean;
+    /** Message grammar to validate: `auto` picks by framework (i18next `{{x}}`, ICU for next-intl, `{x}` braces for vue-i18n). */
+    readonly messageSyntax: "auto" | "i18next" | "icu" | "braces" | "off";
     /** A dotless key such as t("total") only counts as a translation key when a default follows (default false). */
     readonly bareKeysNeedDefault: boolean;
     /** `calls`: a key is used when a translator call references it. `literals`: any quoted string equal to the key (or an ancestor/dynamic prefix) counts, e.g. keys kept in config objects. */

@@ -11,7 +11,7 @@ const HELP = `i18n-guard — stop untranslated text before it ships
 
   i18n-guard init [--framework react-i18next|next-intl|vue-i18n] [--force]
   i18n-guard check [--strict] [--staged] [--only a,b] [--format console|markdown|json|sarif]
-                   [--output file] [--no-baseline] [--config path]
+                   [--output file] [--no-baseline] [--fix] [--config path]
   i18n-guard baseline            Record current findings so only NEW ones fail
   i18n-guard report              Same as check --format markdown --output i18n-guard-report.md
   i18n-guard doctor              Verify config, locale files and tooling
@@ -133,9 +133,10 @@ export async function main(argv: string[]): Promise<number> {
     }
     const format = (cmd === "report" ? "markdown" : (str("format") ?? "console")) as Format;
     const r = await runGuard(config, {
-      strict: flags.has("strict"), staged: flags.has("staged"), noBaseline: flags.has("no-baseline"),
+      strict: flags.has("strict"), fix: flags.has("fix"), staged: flags.has("staged"), noBaseline: flags.has("no-baseline"),
       only: str("only")?.split(",").map((s) => s.trim()),
     });
+    if (r.fixed?.length) console.log(`Fixed key order in ${r.fixed.length} file(s): ${r.fixed.join(", ")}`);
     const text = render(r, format);
     const out = str("output") ?? (cmd === "report" ? "i18n-guard-report.md" : undefined);
     if (out) { fs.writeFileSync(path.resolve(cwd, out), `${text}\n`); console.log(`Report written to ${out} (${r.issues.length} finding(s)).`); } else console.log(text);

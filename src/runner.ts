@@ -5,11 +5,12 @@ import { loadLocales } from "./locales.js";
 import { hygiene, parity, placeholders, untranslated, variables } from "./checks/locale.js";
 import { idMaps, missingKeys, unusedKeys } from "./checks/keys.js";
 import { eslintCheck } from "./checks/eslint.js";
+import { fixSortedKeys, sortedKeys, syntax, types } from "./checks/structure.js";
 
 type Flag = keyof GuardConfig["checks"];
 export const CHECKS: ReadonlyArray<readonly [Flag, Check]> = [
   ["parity", parity], ["untranslated", untranslated], ["placeholders", placeholders], ["variables", variables],
-  ["hygiene", hygiene], ["missingKeys", missingKeys], ["unusedKeys", unusedKeys], ["idMaps", idMaps], ["eslint", eslintCheck],
+  ["hygiene", hygiene], ["missingKeys", missingKeys], ["unusedKeys", unusedKeys], ["idMaps", idMaps], ["types", types], ["syntax", syntax], ["sortedKeys", sortedKeys], ["eslint", eslintCheck],
 ];
 
 export interface RunOptions {
@@ -19,6 +20,8 @@ export interface RunOptions {
   /** Ignore the baseline and write a new one from the current findings. */
   readonly updateBaseline?: boolean;
   readonly noBaseline?: boolean;
+  /** Rewrite locale files to fix what is auto-fixable (currently: key order) before checking. */
+  readonly fix?: boolean;
 }
 
 export interface RunResult {
@@ -28,6 +31,8 @@ export interface RunResult {
   readonly skipped: string[];
   readonly failed: boolean;
   readonly baselineWritten?: number;
+  /** Files rewritten by --fix. */
+  readonly fixed?: string[];
 }
 
 export function stagedFiles(root: string): Set<string> {
@@ -37,6 +42,7 @@ export function stagedFiles(root: string): Set<string> {
 
 export async function runGuard(config: GuardConfig, opts: RunOptions = {}): Promise<RunResult> {
   const staged = opts.staged ? stagedFiles(config.root) : null;
+  const fixed = opts.fix ? fixSortedKeys(config) : [];
   const locales = loadLocales(config);
   const ctx = { config, locales, staged };
   const raw: Issue[] = [];
@@ -67,5 +73,5 @@ export async function runGuard(config: GuardConfig, opts: RunOptions = {}): Prom
     }
   }
   const failed = issues.some((i) => i.severity === "error" || (opts.strict === true && i.severity === "warning"));
-  return { issues, baselined, ran, skipped, failed };
+  return { issues, baselined, ran, skipped, failed, fixed };
 }
