@@ -1,3 +1,3 @@
-import { next } from "i18n-guard/eslint";
+import { next } from "@ammar-multani/i18n-guard/eslint";
 
 export default [...next()];

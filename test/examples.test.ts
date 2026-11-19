@@ -7,9 +7,9 @@ import { loadConfig } from "../src/config.js";
 import { runGuard } from "../src/runner.js";
 
 const repo = path.resolve(".");
-// Examples import "i18n-guard/eslint" and its peers: resolve them from this repo.
-const self = path.join(repo, "node_modules", "i18n-guard");
-if (!fs.existsSync(self)) fs.symlinkSync(repo, self, "dir");
+// Examples import "@ammar-multani/i18n-guard/eslint" and its peers: resolve them from this repo.
+const self = path.join(repo, "node_modules", "@ammar-multani", "i18n-guard");
+if (!fs.existsSync(self)) { fs.mkdirSync(path.dirname(self), { recursive: true }); fs.symlinkSync(repo, self, "dir"); }
 
 function stage(example: string, withBug: boolean): string {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), `example-${example}-`));

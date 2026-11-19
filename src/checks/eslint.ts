@@ -6,7 +6,7 @@ import { toPosix } from "../util.js";
 const DEFAULT_MATCH = ["Hardcoded", "not translatable", "English fallback", "as any"];
 const DEFAULT_RULES = ["i18next/no-literal-string", "vue/no-bare-strings-in-template"];
 
-/** Runs your ESLint config and keeps only the i18n findings (see the `i18n-guard/eslint` presets). */
+/** Runs your ESLint config and keeps only the i18n findings (see the `@ammar-multani/i18n-guard/eslint` presets). */
 export const eslintCheck: Check = {
   name: "eslint",
   description: "Hardcoded copy found by ESLint (JSX text, attributes, toasts, template literals, English fallbacks)",

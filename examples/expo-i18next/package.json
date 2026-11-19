@@ -1,1 +1,1 @@
-{ "name": "example-expo-i18next", "private": true, "type": "module", "scripts": { "check:i18n": "i18n-guard check --strict" }, "devDependencies": { "i18n-guard": "*", "eslint": "^9.0.0" } }
+{ "name": "example-expo-i18next", "private": true, "type": "module", "scripts": { "check:i18n": "i18n-guard check --strict" }, "devDependencies": { "@ammar-multani/i18n-guard": "*", "eslint": "^9.0.0" } }

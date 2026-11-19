@@ -12,10 +12,8 @@ A single lint rule is not enough. Untranslated copy still reaches users through 
 
 ## Quick start
 
-> **Install from GitHub, not from npm.** The name `i18n-guard` on the npm registry is a different, unrelated package. Pin a release tag (below) or use `pnpm add -D github:Ammar-Multani/i18n-guard#v0.4.1`. After installing, `npx i18n-guard` runs the local copy.
-
 ```bash
-npm i -D github:Ammar-Multani/i18n-guard#v0.4.1 eslint
+npm i -D @ammar-multani/i18n-guard eslint   # note the scope: the unscoped npm name "i18n-guard" is a different package
 npx i18n-guard init        # detects framework + locale folder; writes config, CI workflow, hook, Claude skill
 npx i18n-guard check       # see the backlog
 npx i18n-guard baseline    # accept it: from now on only NEW problems fail
@@ -24,7 +22,7 @@ npx i18n-guard baseline    # accept it: from now on only NEW problems fail
 Add the ESLint preset to `eslint.config.js`:
 
 ```js
-import { reactNative } from "i18n-guard/eslint"; // react | reactNative | next | vue
+import { reactNative } from "@ammar-multani/i18n-guard/eslint"; // react | reactNative | next | vue
 export default [...yourConfig, ...reactNative({ allowStrings: ["Acme"] })];
 ```
 
@@ -82,7 +80,7 @@ Locale JSON cannot hold comments: use `options.ignoreKeys` there.
 ## Runtime: catch keys users actually hit
 
 ```ts
-import { installMissingKeyReporter } from "i18n-guard/runtime";
+import { installMissingKeyReporter } from "@ammar-multani/i18n-guard/runtime";
 installMissingKeyReporter(i18n, { report: (e) => Sentry.captureMessage(`i18n missing ${e.namespace}:${e.key}`) });
 ```
 

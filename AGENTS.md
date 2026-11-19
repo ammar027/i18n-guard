@@ -8,11 +8,11 @@ i18n-guard blocks untranslated text: hardcoded UI strings, missing/empty/copied 
 
 1. Confirm the project uses i18next, next-intl or vue-i18n and has JSON locale files. If not, stop and tell the user.
 2. Install with the project's package manager (check the lockfile: pnpm, yarn, bun or npm):
-   `npm i -D github:Ammar-Multani/i18n-guard#v0.4.1 eslint` (use `pnpm add -D` / `yarn add -D` as appropriate). Install from GitHub: the name `i18n-guard` on the npm registry is a different, unrelated package, so never run `npm i i18n-guard` or `npx i18n-guard` before it is installed from GitHub.
+   `npm i -D @ammar-multani/i18n-guard eslint` (use `pnpm add -D` / `yarn add -D` as appropriate). Always use the scoped name: the unscoped npm package `i18n-guard` is a different, unrelated project, so never run `npm i i18n-guard`, and never run `npx i18n-guard` before the scoped package is installed.
 3. Run `npx i18n-guard init`. It detects the framework and locale folder and writes `i18n-guard.config.json`, a CI workflow, a pre-commit hook script and the `i18n-fix` skill. Do not overwrite existing files without `--force` and the user's OK.
 4. Run `npx i18n-guard doctor` and fix what it reports (wrong locale folder, missing languages, source roots). In a monorepo, set one `eslint` entry per app in the config (see docs/CONFIG.md).
 5. Add the ESLint preset to `eslint.config.js` (keep existing config):
-   `import { react } from "i18n-guard/eslint";` then spread `...react()` into the config array.
+   `import { react } from "@ammar-multani/i18n-guard/eslint";` then spread `...react()` into the config array.
    Use `reactNative` for Expo/React Native, `next` for Next.js, and for Vue `vue({ vuePlugin, vueParser })` (needs `eslint-plugin-vue`, `vue-eslint-parser`).
    Add brand names or codes that are not copy via `allowStrings: ["Acme"]`.
 6. Set `options.forbiddenChars` if a locale needs it (for example Swiss German: `{ "de": ["ß"] }`).

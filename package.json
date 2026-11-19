@@ -1,6 +1,6 @@
 {
-  "name": "i18n-guard",
-  "version": "0.4.1",
+  "name": "@ammar-multani/i18n-guard",
+  "version": "0.5.0",
   "description": "Stop untranslated text before it ships: ESLint rules, locale checks, key scanners, baselines, hooks and CI for i18next, next-intl and vue-i18n projects.",
   "type": "module",
   "license": "MIT",
@@ -47,7 +47,8 @@
     "typecheck": "tsc --noEmit",
     "test": "tsx --test test/*.test.ts",
     "check:private": "node scripts/check-private-strings.mjs",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "prepublishOnly": "npm run build && npm test && npm run check:private"
   },
   "peerDependencies": {
     "eslint": ">=9"
@@ -69,5 +70,16 @@
     "tsx": "^4.19.0",
     "typescript": "^5.6.0",
     "vue-eslint-parser": "^10.4.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ammar027/i18n-guard.git"
+  },
+  "homepage": "https://github.com/ammar027/i18n-guard#readme",
+  "bugs": {
+    "url": "https://github.com/ammar027/i18n-guard/issues"
   }
 }

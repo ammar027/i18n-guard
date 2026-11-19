@@ -52,7 +52,7 @@ export function sarifReport(r: RunResult): string {
   return JSON.stringify({
     $schema: "https://json.schemastore.org/sarif-2.1.0.json",
     version: "2.1.0",
-    runs: [{ tool: { driver: { name: "i18n-guard", informationUri: "https://github.com/", rules } }, results }],
+    runs: [{ tool: { driver: { name: "i18n-guard", informationUri: "https://github.com/ammar027/i18n-guard", rules } }, results }],
   }, null, 2);
 }
 
