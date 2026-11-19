@@ -11,4 +11,4 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
       - run: npm ci
-      - run: npx i18n-guard check --strict
+      - run: npx --no-install i18n-guard check --strict

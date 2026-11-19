@@ -12,8 +12,10 @@ A single lint rule is not enough. Untranslated copy still reaches users through 
 
 ## Quick start
 
+> **Install from GitHub, not from npm.** The name `i18n-guard` on the npm registry is a different, unrelated package. Pin a release tag (below) or use `pnpm add -D github:Ammar-Multani/i18n-guard#v0.4.1`. After installing, `npx i18n-guard` runs the local copy.
+
 ```bash
-npm i -D i18n-guard eslint
+npm i -D github:Ammar-Multani/i18n-guard#v0.4.1 eslint
 npx i18n-guard init        # detects framework + locale folder; writes config, CI workflow, hook, Claude skill
 npx i18n-guard check       # see the backlog
 npx i18n-guard baseline    # accept it: from now on only NEW problems fail

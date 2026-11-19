@@ -1,6 +1,7 @@
 # Adopting on an existing project
 
-1. `npx i18n-guard init`, then `npx i18n-guard doctor`.
+0. Install from GitHub (`npm i -D github:Ammar-Multani/i18n-guard#v0.4.1 eslint`); the npm registry has an unrelated package of the same name.
+1. `npx --no-install i18n-guard init`, then `npx i18n-guard doctor`.
 2. Add the ESLint preset (`react`, `reactNative`, `next`, or `vue`) from `i18n-guard/eslint` to `eslint.config.js`.
    - Monorepo: set `eslint[].cwd` in the config for each app.
    - Vue: `vue({ vuePlugin, vueParser })` with `eslint-plugin-vue` + `vue-eslint-parser` (beta).
